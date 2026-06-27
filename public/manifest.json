@@ -1,0 +1,15 @@
+{
+  "name": "AL ARSH FREIGHT CARRIER",
+  "short_name": "AL ARSH",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1D3763",
+  "description": "AL ARSH FREIGHT CARRIER - Modern Logistics Company Website",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any"
+    }
+  ]
+}

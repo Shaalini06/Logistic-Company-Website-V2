@@ -1,0 +1,225 @@
+.logistics-loader-container {
+  position: fixed;
+  inset: 0;
+  background-color: #071f3d; /* AL ARSH navy deep */
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+.logistics-loader-container.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loader-logo {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  object-fit: cover;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+  animation: logoPulse 2s ease-in-out infinite;
+}
+
+.loader-tagline {
+  color: #6CC9C0; /* AL ARSH teal accent */
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 50px;
+  text-align: center;
+}
+
+/* Road & Journey Container */
+.loader-journey {
+  width: 320px;
+  position: relative;
+  margin-top: 20px;
+}
+
+.loader-road-line {
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Progress bar inside the road, following the truck */
+.loader-progress-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #3FAFA8, #6CC9C0);
+  animation: fillProgress 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Truck Wrapper moves along the road */
+.loader-truck-wrapper {
+  position: absolute;
+  bottom: 3px; /* sits right on top of the road line */
+  left: 0%;
+  transform: translateX(-100%);
+  width: 60px;
+  height: 25px;
+  animation: moveTruck 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* The Truck CSS visual */
+.loader-truck {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.truck-body {
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+}
+
+.truck-container {
+  width: 42px;
+  height: 18px;
+  background-color: #3FAFA8; /* AL ARSH teal */
+  border-radius: 2px;
+  font-size: 7px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  color: #071f3d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.5px;
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.15);
+}
+
+.truck-cabin {
+  width: 14px;
+  height: 14px;
+  background-color: #ffffff;
+  border-radius: 1px 3px 1px 1px;
+  position: relative;
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.15);
+}
+
+.truck-cabin::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 5px;
+  height: 5px;
+  background-color: #071f3d;
+  border-radius: 1px;
+}
+
+/* Wheels */
+.truck-wheel {
+  position: absolute;
+  bottom: -3px;
+  width: 8px;
+  height: 8px;
+  background-color: #111111;
+  border-radius: 50%;
+  border: 1.5px dashed #ffffff;
+  animation: spinWheels 0.8s linear infinite;
+}
+
+.wheel-front {
+  right: 2px;
+}
+
+.wheel-back-1 {
+  left: 4px;
+}
+
+.wheel-back-2 {
+  left: 14px;
+}
+
+/* Smoke Particles */
+.smoke-particles {
+  position: absolute;
+  left: -8px;
+  bottom: 0px;
+  width: 10px;
+  height: 10px;
+}
+
+.smoke-p {
+  width: 4px;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  position: absolute;
+  opacity: 0;
+}
+
+.p1 { animation: emitSmoke 1.2s infinite 0.1s; }
+.p2 { animation: emitSmoke 1.2s infinite 0.4s; }
+.p3 { animation: emitSmoke 1.2s infinite 0.7s; }
+.p4 { animation: emitSmoke 1.2s infinite 1.0s; }
+
+/* Animations keyframes */
+@keyframes logoPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 4px 25px rgba(108, 201, 192, 0.25);
+  }
+}
+
+@keyframes moveTruck {
+  0% {
+    left: 0%;
+    transform: translateX(-100%);
+  }
+  100% {
+    left: 100%;
+    transform: translateX(-60px); /* stop right at the destination edge */
+  }
+}
+
+@keyframes fillProgress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+@keyframes spinWheels {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes emitSmoke {
+  0% {
+    transform: translate(0, 0) scale(0.5);
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translate(-15px, -6px) scale(2);
+    opacity: 0;
+  }
+}
