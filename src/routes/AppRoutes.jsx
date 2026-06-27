@@ -16,6 +16,8 @@ import NotFound from "../pages/NotFound";
 // New Pages & Components
 import LandingPage from "../pages/LandingPage";
 import AuthPage from "../pages/AuthPage";
+import FeedbackPage from "../pages/FeedbackPage";
+import AdminReviews from "../pages/AdminReviews";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import useAuth from "../hooks/useAuth";
 import RouteTransitionLoader from "../components/auth/RouteTransitionLoader";
@@ -53,6 +55,8 @@ export default function AppRoutes() {
             <Route path="blog" element={<Blog />} />
             <Route path="blog/:id" element={<BlogDetail />} />
             <Route path="contact" element={<Contact />} />
+            <Route path="feedback" element={<FeedbackPage />} />
+            <Route path="admin/reviews" element={<AdminReviews />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Route>

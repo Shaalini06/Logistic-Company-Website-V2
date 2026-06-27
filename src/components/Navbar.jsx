@@ -122,6 +122,22 @@ export default function Navbar() {
             </Link>
           )}
         </li>
+        {/* Feedback link — only in authenticated dashboard */}
+        {!isLanding && (
+          <li>
+            <Link to="/main/feedback" className={location.pathname === "/main/feedback" ? "active" : ""}>
+              Feedback
+            </Link>
+          </li>
+        )}
+        {/* Admin Reviews link — only for Admin users in dashboard */}
+        {!isLanding && user && user.role === "Admin" && (
+          <li>
+            <Link to="/main/admin/reviews" className={location.pathname === "/main/admin/reviews" ? "active" : ""}>
+              Reviews
+            </Link>
+          </li>
+        )}
       </ul>
 
       <div className="nav-actions-wrapper">

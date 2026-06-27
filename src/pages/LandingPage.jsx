@@ -1,7 +1,11 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion, useInView, AnimatePresence } from "framer-motion";
-import { Mail, Phone, MapPin, CheckCircle, FileText, Send, HelpCircle, ArrowRight, MessageSquare, Plus, Lock } from "lucide-react";
+import { Mail, Phone, MapPin, CheckCircle, FileText, Send, HelpCircle, ArrowRight, MessageSquare, Plus, Lock, Star, Clock } from "lucide-react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination, Autoplay } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
 import Navbar from "../components/Navbar";
 import IntroVideo from "../components/IntroVideo";
 
@@ -152,24 +156,16 @@ export default function LandingPage() {
     window.open(waUrl, "_blank");
   };
 
-  // Get in Touch Form States
-  const [contactName, setContactName] = useState("");
-  const [contactCompany, setContactCompany] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [contactSuccess, setContactSuccess] = useState(false);
-
-  const handleContactSubmit = (e) => {
-    e.preventDefault();
-    if (!contactName || !contactPhone) {
-      alert("Please enter your name and phone number.");
-      return;
-    }
-    setContactSuccess(true);
-    setContactName("");
-    setContactCompany("");
-    setContactPhone("");
-    setTimeout(() => setContactSuccess(false), 4000);
-  };
+  // Dynamic Reviews State
+  const [publicReviews, setPublicReviews] = useState([]);
+  useEffect(() => {
+    fetch("http://localhost:5000/api/reviews/public")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.reviews) setPublicReviews(data.reviews);
+      })
+      .catch(() => { /* silently fail — show fallback */ });
+  }, []);
 
   return (
     <>
@@ -616,10 +612,121 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* SECTION 6 — QUOTE FORM (Need Transportation?) */}
+
+
+      {/* SECTION 7 — CLIENT REVIEWS (Dynamic from DB) */}
       <section 
-        id="quote" 
-        ref={quoteRef}
+        style={{
+          padding: "120px 0",
+          background: "#08101c"
+        }}
+      >
+        <div className="container">
+          <div className="text-center mb-5">
+            <span style={{ color: "var(--color-accent)", fontWeight: "700", fontSize: "0.9rem", textTransform: "uppercase", letterSpacing: "2px" }}>CLIENT REVIEWS</span>
+            <h2 className="section-title" style={{ color: "white", fontSize: "clamp(2rem, 4vw, 2.8rem)", marginTop: "10px" }}>
+              Trusted by Industry Leaders
+            </h2>
+            <div className="title-underline" style={{ background: "linear-gradient(90deg, var(--color-accent), transparent)" }}></div>
+          </div>
+
+          {publicReviews.length > 0 ? (
+            <Swiper
+              modules={[Pagination, Autoplay]}
+              pagination={{ clickable: true }}
+              autoplay={{ delay: 5000, disableOnInteraction: false }}
+              spaceBetween={24}
+              slidesPerView={1}
+              breakpoints={{
+                768: { slidesPerView: 2 },
+                1024: { slidesPerView: Math.min(publicReviews.length, 3) },
+              }}
+              style={{ paddingBottom: "50px" }}
+            >
+              {publicReviews.map((review, idx) => (
+                <SwiperSlide key={review.id || idx}>
+                  <div className="glass-card" style={{ height: "100%", minHeight: "280px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                    <div>
+                      {review.review_title && (
+                        <h5 style={{ color: "white", fontWeight: "700", fontSize: "1.05rem", marginBottom: "10px" }}>
+                          "{review.review_title}"
+                        </h5>
+                      )}
+                      <div className="mb-3" style={{ color: "var(--color-accent)" }}>
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            size={16}
+                            fill={i < review.rating ? "var(--color-accent)" : "transparent"}
+                            stroke={i < review.rating ? "var(--color-accent)" : "rgba(255,255,255,0.2)"}
+                            strokeWidth={1.5}
+                            style={{ marginRight: "3px" }}
+                          />
+                        ))}
+                      </div>
+                      <p style={{ color: "rgba(255,255,255,0.8)", fontStyle: "italic", fontSize: "0.95rem", lineHeight: "1.6" }}>
+                        "{review.review_message}"
+                      </p>
+                    </div>
+                    <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "15px", marginTop: "20px", display: "flex", alignItems: "center", gap: "12px" }}>
+                      {review.profile_photo ? (
+                        <img src={review.profile_photo} alt="" style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover" }} />
+                      ) : (
+                        <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "rgba(63,175,168,0.2)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-accent)", fontWeight: "700", fontSize: "0.8rem", flexShrink: 0 }}>
+                          {review.customer_name?.charAt(0)?.toUpperCase()}
+                        </div>
+                      )}
+                      <div>
+                        <h6 style={{ color: "white", fontWeight: "700", margin: 0 }}>{review.customer_name}</h6>
+                        {review.company_name && <span style={{ fontSize: "0.75rem", color: "var(--color-accent)" }}>{review.company_name}</span>}
+                      </div>
+                    </div>
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          ) : (
+            <div style={{ textAlign: "center", padding: "40px 20px" }}>
+              <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "1rem" }}>
+                No reviews yet. Be the first to share your experience!
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* SECTION 8 — ASSOCIATED BRANDS */}
+      <section 
+        style={{
+          padding: "50px 0",
+          background: "#060e1a",
+          borderTop: "1px solid rgba(255,255,255,0.03)",
+          borderBottom: "1px solid rgba(255,255,255,0.03)"
+        }}
+      >
+        <div className="container">
+          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-around", alignItems: "center", gap: "30px", opacity: 0.4 }}>
+            <span style={{ fontSize: "1.2rem", fontWeight: "800", color: "white", letterSpacing: "1px" }}>ASSOCIATED WITH LEADING BRANDS</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "1.3rem", fontWeight: "700" }}>
+              <i className="fa-brands fa-aws"></i> AWS
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "1.3rem", fontWeight: "700" }}>
+              <i className="fa-brands fa-dhl"></i> DHL Express
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "1.3rem", fontWeight: "700" }}>
+              <i className="fa-brands fa-fedex"></i> FedEx
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "1.3rem", fontWeight: "700" }}>
+              <i className="fa-brands fa-cpanel"></i> cPanel
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 9 — CONTACT (Request a Freight Quote Form) */}
+      <section 
+        id="contact" 
+        ref={contactRef}
         style={{
           padding: "120px 0",
           background: "radial-gradient(circle at 0% 100%, rgba(63, 175, 168, 0.08) 0%, transparent 60%), #060e1a",
@@ -638,7 +745,7 @@ export default function LandingPage() {
 
           <motion.div
             initial={{ opacity: 0, y: 30 }}
-            animate={quoteInView ? { opacity: 1, y: 0 } : {}}
+            animate={contactInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8 }}
             className="glass-card"
             style={{ padding: "40px" }}
@@ -797,261 +904,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* SECTION 7 — CLIENT REVIEWS */}
-      <section 
-        style={{
-          padding: "120px 0",
-          background: "#08101c"
-        }}
-      >
-        <div className="container">
-          <div className="text-center mb-5">
-            <span style={{ color: "var(--color-accent)", fontWeight: "700", fontSize: "0.9rem", textTransform: "uppercase", letterSpacing: "2px" }}>CLIENT REVIEWS</span>
-            <h2 className="section-title" style={{ color: "white", fontSize: "clamp(2rem, 4vw, 2.8rem)", marginTop: "10px" }}>
-              Trusted by Industry Leaders
-            </h2>
-            <div className="title-underline" style={{ background: "linear-gradient(90deg, var(--color-accent), transparent)" }}></div>
-          </div>
-
-          <div className="row g-4">
-            {/* Review 1 */}
-            <div className="col-lg-4">
-              <div className="glass-card" style={{ height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                <div>
-                  <div className="mb-3" style={{ color: "var(--color-accent)" }}>
-                    {[...Array(5)].map((_, i) => <i key={i} className="fa-solid fa-star" style={{ marginRight: "4px" }}></i>)}
-                  </div>
-                  <p style={{ color: "rgba(255,255,255,0.8)", fontStyle: "italic", fontSize: "0.95rem", lineHeight: "1.6" }}>
-                    "Al Arsh Freight Carriers has completely streamlined our supply chain. Their FTL services are always on time, giving us perfect peace of mind."
-                  </p>
-                </div>
-                <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "15px", marginTop: "20px" }}>
-                  <h6 style={{ color: "white", fontWeight: "700", margin: 0 }}>Rajesh Kumar</h6>
-                  <span style={{ fontSize: "0.75rem", color: "var(--color-accent)" }}>Logistics Head, Steel Ind.</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Review 2 */}
-            <div className="col-lg-4">
-              <div className="glass-card" style={{ height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                <div>
-                  <div className="mb-3" style={{ color: "var(--color-accent)" }}>
-                    {[...Array(5)].map((_, i) => <i key={i} className="fa-solid fa-star" style={{ marginRight: "4px" }}></i>)}
-                  </div>
-                  <p style={{ color: "rgba(255,255,255,0.8)", fontStyle: "italic", fontSize: "0.95rem", lineHeight: "1.6" }}>
-                    "Finding a reliable partner for heavy trailer transport was tough until we found Al Arsh. Their professional approach and safety standards are unmatched."
-                  </p>
-                </div>
-                <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "15px", marginTop: "20px" }}>
-                  <h6 style={{ color: "white", fontWeight: "700", margin: 0 }}>Sandeep Singh</h6>
-                  <span style={{ fontSize: "0.75rem", color: "var(--color-accent)" }}>Operations Manager, Mfg.</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Review 3 */}
-            <div className="col-lg-4">
-              <div className="glass-card" style={{ height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                <div>
-                  <div className="mb-3" style={{ color: "var(--color-accent)" }}>
-                    {[...Array(5)].map((_, i) => <i key={i} className="fa-solid fa-star" style={{ marginRight: "4px" }}></i>)}
-                  </div>
-                  <p style={{ color: "rgba(255,255,255,0.8)", fontStyle: "italic", fontSize: "0.95rem", lineHeight: "1.6" }}>
-                    "Excellent dedicated support. Whenever we have urgent dispatch requirements, their part-load transportation services deliver consistently."
-                  </p>
-                </div>
-                <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "15px", marginTop: "20px" }}>
-                  <h6 style={{ color: "white", fontWeight: "700", margin: 0 }}>Amit Patel</h6>
-                  <span style={{ fontSize: "0.75rem", color: "var(--color-accent)" }}>Supply Chain Director</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 8 — ASSOCIATED BRANDS */}
-      <section 
-        style={{
-          padding: "50px 0",
-          background: "#060e1a",
-          borderTop: "1px solid rgba(255,255,255,0.03)",
-          borderBottom: "1px solid rgba(255,255,255,0.03)"
-        }}
-      >
-        <div className="container">
-          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-around", alignItems: "center", gap: "30px", opacity: 0.4 }}>
-            <span style={{ fontSize: "1.2rem", fontWeight: "800", color: "white", letterSpacing: "1px" }}>ASSOCIATED WITH LEADING BRANDS</span>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "1.3rem", fontWeight: "700" }}>
-              <i className="fa-brands fa-aws"></i> AWS
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "1.3rem", fontWeight: "700" }}>
-              <i className="fa-brands fa-dhl"></i> DHL Express
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "1.3rem", fontWeight: "700" }}>
-              <i className="fa-brands fa-fedex"></i> FedEx
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "1.3rem", fontWeight: "700" }}>
-              <i className="fa-brands fa-cpanel"></i> cPanel
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 9 — GET IN TOUCH (Contact & Map) */}
-      <section 
-        id="contact" 
-        ref={contactRef}
-        style={{
-          padding: "120px 0",
-          background: "linear-gradient(180deg, var(--color-dark) 0%, #060f1c 100%)"
-        }}
-      >
-        <div className="container">
-          <div className="row g-5">
-            {/* Left side: details & map */}
-            <div className="col-lg-6">
-              <motion.div
-                initial={{ opacity: 0, x: -40 }}
-                animate={contactInView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.8 }}
-              >
-                <span style={{ color: "var(--color-accent)", fontWeight: "700", fontSize: "0.9rem", textTransform: "uppercase", letterSpacing: "2px", display: "block", marginBottom: "10px" }}>GET IN TOUCH</span>
-                <h2 style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.5rem)", fontFamily: "Syne, sans-serif", fontWeight: 800, color: "white", marginBottom: "30px" }}>
-                  Contact Al Arsh Freight Carriers
-                </h2>
-
-                <div style={{ display: "flex", flexDirection: "column", gap: "24px", marginBottom: "40px" }}>
-                  {/* Address */}
-                  <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
-                    <div style={{ width: "42px", height: "42px", borderRadius: "50%", background: "rgba(63, 175, 168, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-accent)", flexShrink: 0 }}>
-                      <MapPin size={20} />
-                    </div>
-                    <div>
-                      <h5 style={{ margin: "0 0 6px 0", color: "white", fontSize: "1.05rem", fontWeight: "700" }}>Office Address</h5>
-                      <p style={{ margin: 0, color: "rgba(255,255,255,0.7)", fontSize: "0.95rem", lineHeight: "1.5" }}>
-                        186B lg 1 mndha mathur 3rd main road Chennai - 600068
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Phone */}
-                  <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
-                    <div style={{ width: "42px", height: "42px", borderRadius: "50%", background: "rgba(63, 175, 168, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-accent)", flexShrink: 0 }}>
-                      <Phone size={20} />
-                    </div>
-                    <div>
-                      <h5 style={{ margin: "0 0 6px 0", color: "white", fontSize: "1.05rem", fontWeight: "700" }}>Call Us</h5>
-                      <a href="tel:+916385328408" style={{ margin: 0, color: "var(--color-accent)", fontSize: "1.1rem", fontWeight: "700" }}>
-                        +91 6385328408
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Google Map Iframe */}
-                <div style={{ width: "100%", height: "280px", borderRadius: "16px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)" }}>
-                  <iframe 
-                    title="Mathur Chennai Office Location"
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15541.258957865243!2d80.21146747209355!3d13.142512683935293!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a52646d5c643bb7%3A0x444d32a0d9e262c!2sMathur%2C%20Chennai%2C%20Tamil%20Nadu!5e0!3m2!1sen!2sin!4v1687352345678!5m2!1sen!2sin" 
-                    width="100%" 
-                    height="100%" 
-                    style={{ border: 0, filter: "grayscale(1) invert(0.9) contrast(1.2)" }} 
-                    allowFullScreen="" 
-                    loading="lazy"
-                  />
-                </div>
-              </motion.div>
-            </div>
-
-            {/* Right side: message form */}
-            <div className="col-lg-6">
-              <motion.div
-                initial={{ opacity: 0, x: 40 }}
-                animate={contactInView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.8 }}
-                className="glass-card"
-                style={{ padding: "40px" }}
-              >
-                <h3 style={{ fontFamily: "Syne, sans-serif", fontSize: "1.5rem", fontWeight: "700", color: "white", marginBottom: "10px" }}>Send us a Message</h3>
-                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.9rem", marginBottom: "30px" }}>We'll get back to you within 24 hours.</p>
-
-                {contactSuccess && (
-                  <div style={{ background: "rgba(63, 175, 168, 0.15)", border: "1px solid var(--color-accent)", color: "#bbf7f4", padding: "12px 16px", borderRadius: "10px", marginBottom: "20px", fontSize: "0.9rem" }}>
-                    Message sent successfully! We will call you shortly.
-                  </div>
-                )}
-
-                <form onSubmit={handleContactSubmit} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                  {/* Name */}
-                  <div>
-                    <label style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.8)", fontWeight: "600", marginBottom: "6px", display: "block" }}>Your Name *</label>
-                    <input
-                      type="text"
-                      className="auth-input-field"
-                      style={{ paddingLeft: "16px" }}
-                      placeholder="John Doe"
-                      value={contactName}
-                      onChange={(e) => setContactName(e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  {/* Company */}
-                  <div>
-                    <label style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.8)", fontWeight: "600", marginBottom: "6px", display: "block" }}>Company Name</label>
-                    <input
-                      type="text"
-                      className="auth-input-field"
-                      style={{ paddingLeft: "16px" }}
-                      placeholder="Your Company Ltd"
-                      value={contactCompany}
-                      onChange={(e) => setContactCompany(e.target.value)}
-                    />
-                  </div>
-
-                  {/* Phone */}
-                  <div>
-                    <label style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.8)", fontWeight: "600", marginBottom: "6px", display: "block" }}>Phone Number *</label>
-                    <input
-                      type="tel"
-                      className="auth-input-field"
-                      style={{ paddingLeft: "16px" }}
-                      placeholder="+91 XXXXX XXXXX"
-                      value={contactPhone}
-                      onChange={(e) => setContactPhone(e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  {/* Submit */}
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
-                    style={{
-                      background: "linear-gradient(90deg, var(--color-primary), var(--color-accent))",
-                      borderColor: "transparent",
-                      color: "white",
-                      padding: "14px 0",
-                      borderRadius: "12px",
-                      fontWeight: "700",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "10px",
-                      marginTop: "10px"
-                    }}
-                  >
-                    <Send size={16} /> Send Message
-                  </button>
-                </form>
-              </motion.div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* SECTION 10 — FAQ SECTION */}
       <section 
         style={{
@@ -1119,7 +971,7 @@ export default function LandingPage() {
                 <li><a href="#about" onClick={(e) => { e.preventDefault(); document.getElementById("about")?.scrollIntoView({ behavior: "smooth" }); }} style={{ color: "rgba(255,255,255,0.6)" }}>About Us</a></li>
                 <li><a href="#services" onClick={(e) => { e.preventDefault(); document.getElementById("services")?.scrollIntoView({ behavior: "smooth" }); }} style={{ color: "rgba(255,255,255,0.6)" }}>Our Services</a></li>
                 <li><a href="#industries" onClick={(e) => { e.preventDefault(); document.getElementById("industries")?.scrollIntoView({ behavior: "smooth" }); }} style={{ color: "rgba(255,255,255,0.6)" }}>Industries Served</a></li>
-                <li><a href="#quote" onClick={(e) => { e.preventDefault(); document.getElementById("quote")?.scrollIntoView({ behavior: "smooth" }); }} style={{ color: "rgba(255,255,255,0.6)" }}>Request Quote</a></li>
+                <li><a href="#contact" onClick={(e) => { e.preventDefault(); document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" }); }} style={{ color: "rgba(255,255,255,0.6)" }}>Request Quote</a></li>
               </ul>
             </div>
 
