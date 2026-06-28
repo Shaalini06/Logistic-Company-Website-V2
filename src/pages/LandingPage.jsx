@@ -167,6 +167,47 @@ export default function LandingPage() {
       .catch(() => { /* silently fail — show fallback */ });
   }, []);
 
+  const displayReviews = publicReviews.length > 0 ? publicReviews : [
+    {
+      id: 1,
+      customer_name: "Rajesh Kumar",
+      company_name: "Logistics Head, Steel Ind.",
+      rating: 5,
+      review_message: "Al Arsh Freight Carriers has completely streamlined our supply chain. Their FTL services are always on time, giving us perfect peace of mind."
+    },
+    {
+      id: 2,
+      customer_name: "Sandeep Singh",
+      company_name: "Operations Manager, Mfg.",
+      rating: 5,
+      review_message: "Finding a reliable partner for heavy trailer transport was tough until we found Al Arsh. Their competitive pricing and safety standards are unmatched."
+    },
+    {
+      id: 3,
+      customer_name: "Amit Patel",
+      company_name: "Supply Chain Director",
+      rating: 4.5,
+      review_message: "Excellent dedicated support. Whenever we have urgent dispatch requirements, their part-load transportation services deliver consistently."
+    }
+  ];
+
+  const renderStars = (rating) => {
+    const stars = [];
+    const floor = Math.floor(rating);
+    const hasHalf = rating % 1 !== 0;
+
+    for (let i = 0; i < 5; i++) {
+      if (i < floor) {
+        stars.push(<i key={i} className="fa-solid fa-star" style={{ color: "var(--color-accent)", marginRight: "3px" }}></i>);
+      } else if (i === floor && hasHalf) {
+        stars.push(<i key={i} className="fa-solid fa-star-half-stroke" style={{ color: "var(--color-accent)", marginRight: "3px" }}></i>);
+      } else {
+        stars.push(<i key={i} className="fa-regular fa-star" style={{ color: "rgba(255, 255, 255, 0.2)", marginRight: "3px" }}></i>);
+      }
+    }
+    return stars;
+  };
+
   return (
     <>
       {/* Intro Video Overlay — plays before landing page is revealed */}
@@ -612,9 +653,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-
-
-      {/* SECTION 7 — CLIENT REVIEWS (Dynamic from DB) */}
+      {/* SECTION 7 — CLIENT REVIEWS (Format from user screenshot, dark coloring) */}
       <section 
         style={{
           padding: "120px 0",
@@ -630,68 +669,48 @@ export default function LandingPage() {
             <div className="title-underline" style={{ background: "linear-gradient(90deg, var(--color-accent), transparent)" }}></div>
           </div>
 
-          {publicReviews.length > 0 ? (
-            <Swiper
-              modules={[Pagination, Autoplay]}
-              pagination={{ clickable: true }}
-              autoplay={{ delay: 5000, disableOnInteraction: false }}
-              spaceBetween={24}
-              slidesPerView={1}
-              breakpoints={{
-                768: { slidesPerView: 2 },
-                1024: { slidesPerView: Math.min(publicReviews.length, 3) },
-              }}
-              style={{ paddingBottom: "50px" }}
-            >
-              {publicReviews.map((review, idx) => (
-                <SwiperSlide key={review.id || idx}>
-                  <div className="glass-card" style={{ height: "100%", minHeight: "280px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                    <div>
-                      {review.review_title && (
-                        <h5 style={{ color: "white", fontWeight: "700", fontSize: "1.05rem", marginBottom: "10px" }}>
-                          "{review.review_title}"
-                        </h5>
-                      )}
-                      <div className="mb-3" style={{ color: "var(--color-accent)" }}>
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            size={16}
-                            fill={i < review.rating ? "var(--color-accent)" : "transparent"}
-                            stroke={i < review.rating ? "var(--color-accent)" : "rgba(255,255,255,0.2)"}
-                            strokeWidth={1.5}
-                            style={{ marginRight: "3px" }}
-                          />
-                        ))}
-                      </div>
-                      <p style={{ color: "rgba(255,255,255,0.8)", fontStyle: "italic", fontSize: "0.95rem", lineHeight: "1.6" }}>
-                        "{review.review_message}"
-                      </p>
+          <Swiper
+            modules={[Pagination, Autoplay]}
+            pagination={{ clickable: true }}
+            autoplay={{ delay: 5000, disableOnInteraction: false }}
+            spaceBetween={24}
+            slidesPerView={1}
+            breakpoints={{
+              768: { slidesPerView: 2 },
+              1024: { slidesPerView: Math.min(displayReviews.length, 3) },
+            }}
+            style={{ paddingBottom: "50px" }}
+          >
+            {displayReviews.map((review, idx) => (
+              <SwiperSlide key={review.id || idx}>
+                <div 
+                  className="glass-card" 
+                  style={{ 
+                    height: "100%", 
+                    minHeight: "280px", 
+                    display: "flex", 
+                    flexDirection: "column", 
+                    justifyContent: "space-between",
+                    borderTop: "4px solid var(--color-accent)",
+                    padding: "30px"
+                  }}
+                >
+                  <div>
+                    <div className="mb-3" style={{ display: "flex", gap: "3px" }}>
+                      {renderStars(review.rating)}
                     </div>
-                    <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "15px", marginTop: "20px", display: "flex", alignItems: "center", gap: "12px" }}>
-                      {review.profile_photo ? (
-                        <img src={review.profile_photo} alt="" style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover" }} />
-                      ) : (
-                        <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "rgba(63,175,168,0.2)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-accent)", fontWeight: "700", fontSize: "0.8rem", flexShrink: 0 }}>
-                          {review.customer_name?.charAt(0)?.toUpperCase()}
-                        </div>
-                      )}
-                      <div>
-                        <h6 style={{ color: "white", fontWeight: "700", margin: 0 }}>{review.customer_name}</h6>
-                        {review.company_name && <span style={{ fontSize: "0.75rem", color: "var(--color-accent)" }}>{review.company_name}</span>}
-                      </div>
-                    </div>
+                    <p style={{ color: "rgba(255,255,255,0.8)", fontStyle: "italic", fontSize: "0.95rem", lineHeight: "1.6" }}>
+                      "{review.review_message}"
+                    </p>
                   </div>
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          ) : (
-            <div style={{ textAlign: "center", padding: "40px 20px" }}>
-              <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "1rem" }}>
-                No reviews yet. Be the first to share your experience!
-              </p>
-            </div>
-          )}
+                  <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "15px", marginTop: "20px" }}>
+                    <h6 style={{ color: "white", fontWeight: "700", margin: 0 }}>{review.customer_name}</h6>
+                    {review.company_name && <span style={{ fontSize: "0.75rem", color: "var(--color-accent)" }}>{review.company_name}</span>}
+                  </div>
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
         </div>
       </section>
 
@@ -1001,7 +1020,7 @@ export default function LandingPage() {
                 </li>
                 <li style={{ display: "flex", gap: "12px", alignItems: "center" }}>
                   <Mail size={18} style={{ color: "var(--color-accent)", flexShrink: 0 }} />
-                  <a href="mailto:info.alarshfreightcarriers@gmail.com" style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.9rem" }}>info.alarshfreightcarriers@gmail.com</a>
+                  <a href="mailto:alarshfrightcarrier@gmail.com" style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.9rem" }}>alarshfrightcarrier@gmail.com</a>
                 </li>
               </ul>
             </div>

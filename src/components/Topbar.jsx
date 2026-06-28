@@ -5,8 +5,8 @@ export default function Topbar() {
         <a href="tel:+916385328408">
           <i className="fas fa-phone"></i> +91 6385328408
         </a>
-        <a href="mailto:info.alarshfreightcarriers@gmail.com">
-          <i className="fas fa-envelope"></i> info.alarshfreightcarriers@gmail.com
+        <a href="mailto:alarshfrightcarrier@gmail.com">
+          <i className="fas fa-envelope"></i> alarshfrightcarrier@gmail.com
         </a>
       </div>
       <div className="topbar-socials">

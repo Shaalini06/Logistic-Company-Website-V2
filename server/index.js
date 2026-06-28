@@ -4,6 +4,15 @@ import pg from "pg";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import nodemailer from "nodemailer";
+import fs from "fs";
+
+const _log = (msg) => {
+  const line = `[${new Date().toISOString()}] ${msg}\n`;
+  process.stdout.write(line);
+  try { fs.appendFileSync("server_startup.log", line); } catch (_) {}
+};
+_log("Server script started.");
 
 dotenv.config();
 
@@ -34,8 +43,45 @@ const mockUsers = [
 ];
 
 // In-memory fallback arrays for reviews and freight requests
-let mockReviews = [];
-let mockReviewIdCounter = 1;
+let mockReviews = [
+  {
+    id: 1,
+    user_id: 1,
+    customer_name: "Rajesh Kumar",
+    company_name: "Logistics Head, Steel Ind.",
+    rating: 5,
+    review_title: "Streamlined supply chain",
+    review_message: "Al Arsh Freight Carriers has completely streamlined our supply chain. Their FTL services are always on time, giving us perfect peace of mind.",
+    profile_photo: null,
+    status: "Approved",
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 2,
+    user_id: 2,
+    customer_name: "Sandeep Singh",
+    company_name: "Operations Manager, Mfg.",
+    rating: 5,
+    review_title: "Reliable partner",
+    review_message: "Finding a reliable partner for heavy trailer transport was tough until we found Al Arsh. Their competitive pricing and safety standards are unmatched.",
+    profile_photo: null,
+    status: "Approved",
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 3,
+    user_id: null,
+    customer_name: "Amit Patel",
+    company_name: "Supply Chain Director",
+    rating: 4.5,
+    review_title: "Excellent dedicated support",
+    review_message: "Excellent dedicated support. Whenever we have urgent dispatch requirements, their part-load transportation services deliver consistently.",
+    profile_photo: null,
+    status: "Approved",
+    created_at: new Date().toISOString()
+  }
+];
+let mockReviewIdCounter = 4;
 let mockFreightRequests = [];
 let mockFreightRequestIdCounter = 1;
 
@@ -46,6 +92,7 @@ const pool = new pg.Pool({
   database: process.env.PGDATABASE || "alarsh_logistics",
   password: process.env.PGPASSWORD || "your_password",
   port: parseInt(process.env.PGPORT || "5432", 10),
+  connectionTimeoutMillis: 3000,  // Fail fast if DB not available — fall back to memory mode
 });
 
 // ============================================================
@@ -160,6 +207,24 @@ async function initDb() {
         ["Al Arsh Client", "user@alarsh.com", hashedUserPassword, "User"]
       );
       console.log("Database seeded: Default user created.");
+    }
+
+    // Seed default reviews
+    const reviewsCheck = await client.query("SELECT COUNT(*) FROM reviews");
+    if (parseInt(reviewsCheck.rows[0].count, 10) === 0) {
+      await client.query(
+        "INSERT INTO reviews (customer_name, company_name, rating, review_title, review_message, status) VALUES ($1, $2, $3, $4, $5, $6)",
+        ["Rajesh Kumar", "Logistics Head, Steel Ind.", 5, "Streamlined supply chain", "Al Arsh Freight Carriers has completely streamlined our supply chain. Their FTL services are always on time, giving us perfect peace of mind.", "Approved"]
+      );
+      await client.query(
+        "INSERT INTO reviews (customer_name, company_name, rating, review_title, review_message, status) VALUES ($1, $2, $3, $4, $5, $6)",
+        ["Sandeep Singh", "Operations Manager, Mfg.", 5, "Reliable partner", "Finding a reliable partner for heavy trailer transport was tough until we found Al Arsh. Their competitive pricing and safety standards are unmatched.", "Approved"]
+      );
+      await client.query(
+        "INSERT INTO reviews (customer_name, company_name, rating, review_title, review_message, status) VALUES ($1, $2, $3, $4, $5, $6)",
+        ["Amit Patel", "Supply Chain Director", 4, "Excellent dedicated support", "Excellent dedicated support. Whenever we have urgent dispatch requirements, their part-load transportation services deliver consistently.", "Approved"]
+      );
+      console.log("Database seeded: Default reviews created.");
     }
 
     client.release();
@@ -511,9 +576,104 @@ app.delete("/api/admin/reviews/:id", authenticateToken, requireAdmin, async (req
   }
 });
 
-// Run Init and Start Server
-initDb().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Al Arsh Auth API Server is running on port ${PORT}`);
-  });
+// ============================================================
+// CONTACT ENDPOINT
+// ============================================================
+app.post("/api/contact", async (req, res) => {
+  const { fullName, email, subject, message } = req.body;
+
+  if (!fullName || !email || !subject || !message) {
+    return res.status(400).json({ success: false, error: "All fields are required." });
+  }
+
+  // Simple email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ success: false, error: "Please provide a valid email address." });
+  }
+
+  try {
+    const emailUser = process.env.EMAIL_USER;
+    const emailPass = process.env.EMAIL_PASS;
+
+    if (!emailUser || !emailPass) {
+      console.warn("Nodemailer configuration missing in .env (EMAIL_USER or EMAIL_PASS). Message details logged to console instead.");
+      console.log(`--- CONTACT FORM SUBMISSION ---
+Name: ${fullName}
+Email: ${email}
+Subject: ${subject}
+Message: ${message}
+---------------------------------`);
+      return res.json({ 
+        success: true, 
+        message: "Message simulation successful! (Nodemailer credentials missing in .env)" 
+      });
+    }
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: emailUser,
+        pass: emailPass,
+      },
+    });
+
+    const emailBody = `New Contact Request
+
+Name: ${fullName}
+Email: ${email}
+Subject: ${subject}
+
+Message:
+
+${message}`;
+
+    const mailOptions = {
+      from: emailUser,
+      to: "alarshfrightcarrier@gmail.com",
+      replyTo: email,
+      subject: `New Contact Request: ${subject}`,
+      text: emailBody,
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.json({ success: true, message: "Your message has been sent successfully!" });
+  } catch (err) {
+    console.error("Nodemailer error:", err);
+    res.status(500).json({ success: false, error: "Failed to send message. Please try again later." });
+  }
 });
+
+// ============================================================
+// Global Error Handlers — keep server alive & log crashes
+// ============================================================
+process.on("uncaughtException", (err) => {
+  console.error("[UNCAUGHT EXCEPTION]", err);
+});
+
+process.on("unhandledRejection", (reason) => {
+  console.error("[UNHANDLED REJECTION]", reason);
+});
+
+// Run Init and Start Server
+_log("Calling initDb...");
+initDb()
+  .then(() => {
+    _log("initDb complete, starting app.listen...");
+    app.listen(PORT, () => {
+      _log(`Al Arsh Auth API Server is running on port ${PORT}`);
+      console.log(`Al Arsh Auth API Server is running on port ${PORT}`);
+    }).on("error", (err) => {
+      _log(`[SERVER LISTEN ERROR] ${err.message}`);
+      console.error("[SERVER LISTEN ERROR]", err.message);
+    });
+  })
+  .catch((err) => {
+    _log(`[INIT DB FAILED] ${err.message}`);
+    console.error("[INIT DB FAILED]", err);
+    // Even if DB init fails hard, start the server anyway in memory mode
+    app.listen(PORT, () => {
+      _log(`Al Arsh Auth API Server is running on port ${PORT} (memory mode)`);
+      console.log(`Al Arsh Auth API Server is running on port ${PORT} (memory mode)`);
+    });
+  });

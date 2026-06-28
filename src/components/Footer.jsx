@@ -81,7 +81,7 @@ export default function Footer() {
                   <i className="fas fa-phone"></i> +91 6385328408
                 </li>
                 <li>
-                  <i className="fas fa-envelope"></i> info.alarshfreightcarriers@gmail.com
+                  <i className="fas fa-envelope"></i> alarshfrightcarrier@gmail.com
                 </li>
                 <li>
                   <i className="fas fa-clock"></i> Mon - Sat: 9:00 - 18:00

@@ -3562,4 +3562,33 @@ nav.landing-nav.scrolled {
   transform: translateY(-3px);
 }
 
+/* Interactive hover styles for Review cards */
+.review-card-hover {
+  transition: all 0.3s ease-in-out;
+}
+
+.review-card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(29, 55, 99, 0.1) !important;
+}
+
+/* Dashboard main content padding to prevent fixed navbar overlay */
+.dashboard-main {
+  padding-top: 112px;
+}
+
+@media (max-width: 768px) {
+  .dashboard-main {
+    padding-top: 72px;
+  }
+}
+
+/* Responsive card padding on mobile to optimize breathing space */
+@media (max-width: 576px) {
+  .glass-card {
+    padding: 25px 16px !important;
+  }
+}
+
+
 

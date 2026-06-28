@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import AOS from "aos";
 import Hero from "../components/Hero";
-import TrackingSimulator from "../components/TrackingSimulator";
 import Features from "../components/Features";
 import About from "../components/About";
 import Counter from "../components/Counter";
@@ -25,7 +24,6 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <TrackingSimulator />
       <Features />
       <About />
       <Counter />

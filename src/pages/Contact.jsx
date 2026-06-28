@@ -1,16 +1,43 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import AOS from "aos";
 import PageHeader from "../components/PageHeader";
+import { Send } from "lucide-react";
 
 export default function ContactPage() {
   useEffect(() => {
     AOS.init();
   }, []);
 
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [statusMsg, setStatusMsg] = useState(null);
+  const [isSuccess, setIsSuccess] = useState(false);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert("Thank you for reaching out! We will respond soon.");
-    e.target.reset();
+    if (!fullName || !email || !subject || !message) {
+      setStatusMsg("Please fill in all fields.");
+      setIsSuccess(false);
+      return;
+    }
+
+    const mailtoUrl = `mailto:alarshfrightcarrier@gmail.com?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(
+      `Name: ${fullName}\nEmail: ${email}\n\nMessage:\n${message}`
+    )}`;
+
+    window.location.href = mailtoUrl;
+
+    setIsSuccess(true);
+    setStatusMsg("Opening your email client to send the email...");
+    setFullName("");
+    setEmail("");
+    setSubject("");
+    setMessage("");
   };
 
   return (
@@ -48,7 +75,7 @@ export default function ContactPage() {
                 </div>
                 <h5>Email</h5>
                 <p>
-                  <a href="mailto:info.alarshfreightcarriers@gmail.com">info.alarshfreightcarriers@gmail.com</a>
+                  <a href="mailto:alarshfrightcarrier@gmail.com">alarshfrightcarrier@gmail.com</a>
                 </p>
               </div>
             </div>
@@ -57,13 +84,32 @@ export default function ContactPage() {
           <div className="row g-5">
             <div className="col-lg-6" data-aos="fade-right">
               <div className="contact-form">
-                <h3 className="mb-4">Send us a Message</h3>
+                <h3 className="mb-4">Send us an Email</h3>
                 <form onSubmit={handleSubmit}>
+                  {statusMsg && (
+                    <div className="mb-4">
+                      <div 
+                        style={{
+                          padding: "10px 15px",
+                          borderRadius: "6px",
+                          background: isSuccess ? "rgba(37, 211, 102, 0.1)" : "rgba(220, 53, 69, 0.1)",
+                          border: isSuccess ? "1px solid #25D366" : "1px solid #dc3545",
+                          color: isSuccess ? "#25D366" : "#dc3545",
+                          fontSize: "0.9rem",
+                          textAlign: "center"
+                        }}
+                      >
+                        {statusMsg}
+                      </div>
+                    </div>
+                  )}
                   <div className="mb-3">
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="Your Name"
+                      placeholder="Full Name"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
                       required
                     />
                   </div>
@@ -71,7 +117,9 @@ export default function ContactPage() {
                     <input
                       type="email"
                       className="form-control"
-                      placeholder="Your Email"
+                      placeholder="Email Address"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       required
                     />
                   </div>
@@ -80,6 +128,8 @@ export default function ContactPage() {
                       type="text"
                       className="form-control"
                       placeholder="Subject"
+                      value={subject}
+                      onChange={(e) => setSubject(e.target.value)}
                       required
                     />
                   </div>
@@ -88,11 +138,13 @@ export default function ContactPage() {
                       className="form-control"
                       rows="5"
                       placeholder="Message"
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
                       required
                     ></textarea>
                   </div>
-                  <button type="submit" className="btn btn-primary">
-                    Send Message
+                  <button type="submit" className="btn btn-primary" style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                    <Send size={16} /> Send Email
                   </button>
                 </form>
               </div>
