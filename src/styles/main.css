@@ -3447,6 +3447,16 @@ nav.landing-nav {
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+/* Dashboard (main-site) nav sits over light pages — needs a solid dark
+   background so its white links/avatar stay visible. Landing keeps its
+   transparent-over-hero look via .landing-nav above. */
+nav:not(.landing-nav) {
+  background: rgba(7, 31, 61, 0.97);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
 nav.landing-nav.scrolled {
   background-color: rgba(11, 59, 110, 0.95) !important;
   backdrop-filter: blur(20px);
@@ -3590,5 +3600,133 @@ nav.landing-nav.scrolled {
   }
 }
 
+/* =====================================================
+   LANDING THEME MIGRATION — MAIN SITE (dashboard) ONLY
+   Re-skins the authenticated dashboard with the landing page's
+   dark / glass / teal look. The landing page renders no
+   .dashboard-main wrapper, so it is left untouched.
+   ===================================================== */
+
+/* --- Page surface: dark mesh background like the landing hero --- */
+.dashboard-main {
+  position: relative;
+  background-color: var(--color-dark);
+  background-image:
+    radial-gradient(at 0% 0%,   rgba(29, 55, 99, 0.55)  0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(95, 174, 173, 0.12) 0px, transparent 45%),
+    radial-gradient(at 100% 100%, rgba(29, 55, 99, 0.45) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(47, 91, 143, 0.30) 0px, transparent 50%);
+  background-attachment: fixed;
+  color: #fff;
+
+  /* Token remap: light design tokens -> landing dark/glass/teal tokens */
+  --teal:         #5FAEAD;
+  --teal-accent:  #8FC7C3;
+  --accent-color: #5FAEAD;
+  --light-aqua:   #8FC7C3;
+  --teal-glow:    rgba(95, 174, 173, 0.13);
+  --glass-border: rgba(95, 174, 173, 0.2);
+
+  --bg:         var(--color-dark);
+  --light-gray: transparent;
+  --sky:        transparent;
+  --soft-white: rgba(255, 255, 255, 0.08);
+  --card-bg:    rgba(255, 255, 255, 0.05);
+
+  --text-main:  #ffffff;
+  --text-color: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.62);
+  --text-light: rgba(255, 255, 255, 0.45);
+  --border:       rgba(95, 174, 173, 0.18);
+  --border-color: rgba(95, 174, 173, 0.18);
+  --shadow:    0 8px 40px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 16px 60px rgba(0, 0, 0, 0.45);
+}
+
+/* Headings white (--primary-color stays navy for button fills, so set directly) */
+.dashboard-main h1,
+.dashboard-main h2,
+.dashboard-main h3,
+.dashboard-main h4,
+.dashboard-main h5,
+.dashboard-main h6,
+.dashboard-main .section-title {
+  color: #ffffff;
+}
+
+/* Muted body copy that was hard-coded grey (#666 / #999) */
+.dashboard-main .section-subtitle,
+.dashboard-main .feature-desc,
+.dashboard-main .about-text,
+.dashboard-main .about-features li,
+.dashboard-main .service-desc,
+.dashboard-main .period,
+.dashboard-main .pricing-subtitle,
+.dashboard-main .pricing-features li,
+.dashboard-main .testimonial-text,
+.dashboard-main .author-title,
+.dashboard-main .team-bio,
+.dashboard-main .blog-date,
+.dashboard-main .blog-excerpt,
+.dashboard-main .article-meta,
+.dashboard-main .article-content,
+.dashboard-main .contact-info-card p,
+.dashboard-main .hours-list li,
+.dashboard-main .value-card p,
+.dashboard-main .comparison-card li,
+.dashboard-main .service-features li {
+  color: rgba(255, 255, 255, 0.66) !important;
+}
+
+/* Solid white cards/panels -> glassmorphism */
+.dashboard-main .feature-card,
+.dashboard-main .service-card,
+.dashboard-main .pricing-card,
+.dashboard-main .testimonial-card,
+.dashboard-main .team-card,
+.dashboard-main .blog-card,
+.dashboard-main .contact-info-card,
+.dashboard-main .contact-form,
+.dashboard-main .value-card,
+.dashboard-main .feature-detail,
+.dashboard-main .comparison-card,
+.dashboard-main .tracking-search-card,
+.dashboard-main .tracking-result-card,
+.dashboard-main .stat-card,
+.dashboard-main .wf-step {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(95, 174, 173, 0.2) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #fff;
+}
+
+/* Form fields -> dark glass */
+.dashboard-main input,
+.dashboard-main textarea,
+.dashboard-main select,
+.dashboard-main .tracking-input {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(95, 174, 173, 0.25) !important;
+  color: #fff !important;
+}
+.dashboard-main input::placeholder,
+.dashboard-main textarea::placeholder {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Neutralise Bootstrap light section utilities inside the dashboard */
+.dashboard-main .bg-white,
+.dashboard-main .bg-light,
+.dashboard-main .bg-body {
+  background-color: transparent !important;
+}
+
+/* Keep landing's bright teal in dashboard accent gradients */
+.dashboard-main .title-underline,
+.dashboard-main .service-card::before,
+.dashboard-main #stats {
+  background: linear-gradient(135deg, #1D3763, #2F5B8F, #5FAEAD);
+}
 
 
