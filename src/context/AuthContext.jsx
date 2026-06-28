@@ -16,7 +16,7 @@ export function AuthProvider({ children }) {
         if (decoded && !isTokenExpired(decoded)) {
           const role = decoded.role;
           const email = decoded.email;
-          const name = email === "admin@alarsh.com" ? "Administrator" : "Freight Partner";
+          const name = decoded.name || (email === "admin@alarsh.com" ? "Administrator" : "Freight Partner");
           setUser({ email, role, name });
           setIsAuthenticated(true);
         } else {
@@ -82,7 +82,7 @@ export function AuthProvider({ children }) {
       }
 
       if (role) {
-        const token = simulateToken(sanitizedEmail, role);
+        const token = simulateToken(sanitizedEmail, role, name);
         localStorage.setItem("alarsh_token", token);
         const loggedUser = { email: sanitizedEmail, role, name };
         setUser(loggedUser);

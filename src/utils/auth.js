@@ -2,10 +2,11 @@
  * Helper to generate a simulated JWT token.
  * Base64 encodes a JSON payload containing the user email, role, and expiration.
  */
-export const simulateToken = (email, role) => {
+export const simulateToken = (email, role, name) => {
   const payload = {
     email,
     role,
+    name: name || (email === "admin@alarsh.com" ? "Administrator" : "Freight Partner"),
     exp: Date.now() + 86400000 // 24 hours from now
   };
   return btoa(JSON.stringify(payload));
